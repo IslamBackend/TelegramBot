@@ -11,10 +11,18 @@ class DataBase:
         if self.connection:
             print("База данных успешно подключена!")
         self.connection.execute(sql_queries.CREATE_USER_TABLE_QUERY)
+        self.connection.execute(sql_queries.CREATE_ANSWER_TABLE_QUERY)
 
     def sql_insert_users(self, telegram_id, user_name, first_name, last_name):
         self.cursor.execute(
             sql_queries.INSERT_USER_QUERY,
             (None, telegram_id, user_name, first_name, last_name)
+        )
+        self.connection.commit()
+
+    def sql_insert_answers(self, telegram_id, answer):
+        self.cursor.execute(
+            sql_queries.INSERT_ANSWER_QUERY,
+            (telegram_id, answer)
         )
         self.connection.commit()

@@ -2,6 +2,7 @@ import sqlite3
 
 from aiogram import types, Dispatcher
 from config import bot
+from database.sql_commands import DataBase
 from keyboards.inline_buttons import questionnaire_keyboard
 
 
@@ -18,6 +19,7 @@ async def first_card(call: types.CallbackQuery):
         chat_id=call.from_user.id,
         text='You are ONE-PIECE fan 👑',
     )
+    await save_answer(call)
 
 
 async def second_card(call: types.CallbackQuery):
@@ -25,6 +27,16 @@ async def second_card(call: types.CallbackQuery):
         chat_id=call.from_user.id,
         text='You are NARUTO fan 🦊',
     )
+    await save_answer(call)
+
+
+async def save_answer(call: types.CallbackQuery):
+    db = DataBase()
+    db.sql_insert_answers(
+        telegram_id=call.message.chat.id,
+        answer=call.data
+    )
+    print(call.data)
 
 
 def register_call_back_handlers(dp: Dispatcher):
