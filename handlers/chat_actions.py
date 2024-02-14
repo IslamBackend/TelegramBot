@@ -1,5 +1,7 @@
 import datetime
 
+from aiogram.utils.exceptions import ChatAdminRequired
+
 from config import bot
 from aiogram import types, Dispatcher
 from profanity_check import predict_prob
@@ -34,15 +36,18 @@ async def chat_messages(message: types.Message):
                     telegram_id=message.from_user.id
                 )
             elif count >= 3:
-                await bot.send_message(
-                    chat_id=message.chat.id,
-                    text=f"Banned: {message.from_user.first_name}"
-                )
-                await bot.ban_chat_member(
-                    chat_id=message.chat.id,
-                    user_id=message.from_user.id,
-                    until_date=datetime.datetime.now() + datetime.timedelta(minutes=5)
-                )
+                try:
+                    await bot.ban_chat_member(
+                        chat_id=message.chat.id,
+                        user_id=message.from_user.id,
+                        until_date=datetime.datetime.now() + datetime.timedelta(minutes=5)
+                    )
+                    await bot.send_message(
+                        chat_id=message.chat.id,
+                        text=f"Banned: {message.from_user.first_name}"
+                    )
+                except ChatAdminRequired:
+                    print("Not enough privileges to ban")
             elif user:
                 db.sql_update_ban_user_count(
                     telegram_id=message.from_user.id
