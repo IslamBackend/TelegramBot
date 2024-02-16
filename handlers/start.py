@@ -1,7 +1,8 @@
 import sqlite3
 from profanity_check import predict_prob
 from aiogram import types, Dispatcher
-from config import bot
+from config import bot, DESTINATION
+from const import START_MENU
 from database.sql_commands import DataBase
 from keyboards.inline_buttons import start_keyboard
 
@@ -19,11 +20,14 @@ async def start_button(message: types.Message):
     except sqlite3.IntegrityError:
         pass
 
-    await bot.send_message(
-        chat_id=message.from_user.id,
-        text=f"Здравствуйте, {message.from_user.first_name} !!!",
-        reply_markup=await start_keyboard()
-    )
+    with open(DESTINATION + 'bot_ava.jpg', "rb") as photo:
+        await bot.send_photo(
+            chat_id=message.from_user.id,
+            photo=photo,
+            caption=START_MENU.format(
+                user=message.from_user.first_name),
+            reply_markup=await start_keyboard()
+        )
 
 
 def register_start_handlers(dp: Dispatcher):
