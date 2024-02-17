@@ -116,3 +116,10 @@ class DataBase:
             sql_queries.FILTER_LEFT_JOIN_USERFORM_LIKE_QUERY,
             (telegram_id, telegram_id,)
         ).fetchall()
+
+    def sql_delete_user_form(self, telegram_id):
+        self.cursor.execute(
+            sql_queries.DELETE_USER_FORM_QUERY,
+            (telegram_id,)
+        )
+        self.connection.commit()

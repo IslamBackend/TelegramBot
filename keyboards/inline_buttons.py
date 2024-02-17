@@ -54,3 +54,13 @@ async def like_dislike_keyboard(owner_tg_id):
     markup.add(like_button)
     markup.add(dislike_button)
     return markup
+
+
+async def my_profile_keyboard():
+    markup = InlineKeyboardMarkup()
+    delete_button = InlineKeyboardButton(
+        'DELETE 🫥',
+        callback_data=f'delete'
+    )
+    markup.add(delete_button)
+    return markup

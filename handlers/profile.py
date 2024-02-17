@@ -16,18 +16,22 @@ async def my_profile_call(call: types.CallbackQuery):
     profile = db.sql_select_user_form(
         telegram_id=call.from_user.id
     )
-    with open(profile['photo'], "rb") as photo:
-        await bot.send_photo(
-            chat_id=call.from_user.id,
-            photo=photo,
-            caption=USER_FORM_TEXT.format(
-                nickname=profile['nickname'],
-                biography=profile['biography'],
-                location=profile['location'],
-                gender=profile['gender'],
-                age=profile['age']
+    try:
+        with open(profile['photo'], "rb") as photo:
+            await bot.send_photo(
+                chat_id=call.from_user.id,
+                photo=photo,
+                caption=USER_FORM_TEXT.format(
+                    nickname=profile['nickname'],
+                    biography=profile['biography'],
+                    location=profile['location'],
+                    gender=profile['gender'],
+                    age=profile['age']
+                ),
+                reply_markup=await my_profile_keyboard()
             )
-        )
+    except TypeError:
+        pass
 
 
 async def random_profiles_call(call: types.CallbackQuery):
@@ -89,10 +93,21 @@ async def like_detect_call(call: types.CallbackQuery):
         await random_profiles_call(call=call)
 
 
+async def delete_profile_call(call: types.CallbackQuery):
+    db = DataBase()
+    db.sql_delete_user_form(
+        call.from_user.id
+    )
+    await bot.send_message(
+        chat_id=call.from_user.id,
+        text='Your profile deleted successfully!'
+    )
+
+
 def register_profile_handlers(dp: Dispatcher):
     dp.register_callback_query_handler(
         my_profile_call,
-        lambda call: call.data == 'liked_profile_'
+        lambda call: call.data == 'my_profile_call'
     )
     dp.register_callback_query_handler(
         random_profiles_call,
@@ -101,4 +116,8 @@ def register_profile_handlers(dp: Dispatcher):
     dp.register_callback_query_handler(
         like_detect_call,
         lambda call: 'liked_profile_' in call.data
+    )
+    dp.register_callback_query_handler(
+        delete_profile_call,
+        lambda call: call.data == 'delete'
     )

@@ -93,3 +93,7 @@ AND like_forms.LIKER_TELEGRAM_ID = ?
 WHERE like_forms.ID IS NULL 
 AND user_form.TELEGRAM_ID != ?
 """
+
+DELETE_USER_FORM_QUERY = """
+DELETE FROM user_form WHERE TELEGRAM_ID = ?
+"""
