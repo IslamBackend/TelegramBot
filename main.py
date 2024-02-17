@@ -2,7 +2,7 @@ from aiogram import executor
 from config import dp
 from database import sql_commands
 from handlers import (
-    start, call_back, chat_actions, registration
+    start, call_back, chat_actions, registration, profile
 )
 
 
@@ -14,6 +14,7 @@ async def on_startup(_):
 start.register_start_handlers(dp=dp)
 call_back.register_call_back_handlers(dp=dp)
 registration.register_registration_handlers(dp=dp)
+profile.register_profile_handlers(dp=dp)
 chat_actions.register_chat_actions_handlers(dp=dp)
 
 
