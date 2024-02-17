@@ -3,8 +3,11 @@ import sqlite3
 
 import aiogram.utils.exceptions
 from aiogram import types, Dispatcher
+from aiogram.dispatcher import FSMContext
+from aiogram.dispatcher.filters.state import StatesGroup, State
+from aiogram.types import ContentTypes
 
-from config import bot
+from config import bot, DESTINATION
 from const import USER_FORM_TEXT
 from database.sql_commands import DataBase
 from keyboards.inline_buttons import *
@@ -104,6 +107,108 @@ async def delete_profile_call(call: types.CallbackQuery):
     )
 
 
+class UpdateProfileStates(StatesGroup):
+    nickname = State()
+    biography = State()
+    location = State()
+    gender = State()
+    age = State()
+    photo = State()
+
+
+async def update_profile_start(call: types.CallbackQuery):
+    await bot.send_message(
+        chat_id=call.message.chat.id,
+        text='Please send me your updated nickname'
+    )
+    await UpdateProfileStates.nickname.set()
+
+
+async def load_updated_nickname(message: types.Message, state: FSMContext):
+    async with state.proxy() as data:
+        data['updated_nickname'] = message.text
+    await bot.send_message(
+        chat_id=message.from_user.id,
+        text='Send me your updated biography'
+    )
+    await UpdateProfileStates.next()
+
+
+async def load_updated_biography(message: types.Message, state: FSMContext):
+    async with state.proxy() as data:
+        data['updated_biography'] = message.text
+    await bot.send_message(
+        chat_id=message.from_user.id,
+        text='Send me your updated location'
+    )
+    await UpdateProfileStates.next()
+
+
+async def load_updated_location(message: types.Message, state: FSMContext):
+    async with state.proxy() as data:
+        data['updated_location'] = message.text
+    await bot.send_message(
+        chat_id=message.from_user.id,
+        text='Send me your updated gender'
+    )
+    await UpdateProfileStates.next()
+
+
+async def load_updated_gender(message: types.Message, state: FSMContext):
+    async with state.proxy() as data:
+        data['updated_gender'] = message.text
+    await bot.send_message(
+        chat_id=message.from_user.id,
+        text='Send me your updated age'
+    )
+    await UpdateProfileStates.next()
+
+
+async def load_updated_age(message: types.Message, state: FSMContext):
+    async with state.proxy() as data:
+        data['updated_age'] = message.text
+    await bot.send_message(
+        chat_id=message.from_user.id,
+        text='Send me your updated photo'
+    )
+    await UpdateProfileStates.next()
+
+
+async def load_updated_photo(message: types.Message, state: FSMContext):
+    db = DataBase()
+
+    path = await message.photo[-1].download(
+        destination_dir=DESTINATION
+    )
+    async with state.proxy() as data:
+        with open(path.name, "rb") as photo:
+            await bot.send_photo(
+                chat_id=message.from_user.id,
+                photo=photo,
+                caption=USER_FORM_TEXT.format(
+                    nickname=data['updated_nickname'],
+                    biography=data['updated_biography'],
+                    location=data['updated_location'],
+                    gender=data['updated_gender'],
+                    age=data['updated_age']
+                )
+            )
+            db.sql_update_user_form(
+                telegram_id=message.from_user.id,
+                nickname=data['updated_nickname'],
+                biography=data['updated_biography'],
+                location=data['updated_location'],
+                gender=data['updated_gender'],
+                age=data['updated_age'],
+                photo=path.name
+            )
+        await bot.send_message(
+            chat_id=message.from_user.id,
+            text='Profile updated successfully ✅'
+        )
+        await state.finish()
+
+
 def register_profile_handlers(dp: Dispatcher):
     dp.register_callback_query_handler(
         my_profile_call,
@@ -120,4 +225,26 @@ def register_profile_handlers(dp: Dispatcher):
     dp.register_callback_query_handler(
         delete_profile_call,
         lambda call: call.data == 'delete'
+    )
+
+    dp.register_callback_query_handler(
+        update_profile_start, lambda call: call.data == 'update'
+    )
+    dp.register_message_handler(
+        load_updated_nickname, state=UpdateProfileStates.nickname, content_types=ContentTypes.TEXT
+    )
+    dp.register_message_handler(
+        load_updated_biography, state=UpdateProfileStates.biography, content_types=ContentTypes.TEXT
+    )
+    dp.register_message_handler(
+        load_updated_location, state=UpdateProfileStates.location, content_types=ContentTypes.TEXT
+    )
+    dp.register_message_handler(
+        load_updated_gender, state=UpdateProfileStates.gender, content_types=ContentTypes.TEXT
+    )
+    dp.register_message_handler(
+        load_updated_age, state=UpdateProfileStates.age, content_types=ContentTypes.TEXT
+    )
+    dp.register_message_handler(
+        load_updated_photo, state=UpdateProfileStates.photo, content_types=ContentTypes.PHOTO
     )

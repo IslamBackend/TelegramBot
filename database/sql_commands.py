@@ -117,6 +117,13 @@ class DataBase:
             (telegram_id, telegram_id,)
         ).fetchall()
 
+    def sql_update_user_form(self, telegram_id, nickname, biography, location, gender, age, photo):
+        self.cursor.execute(
+            sql_queries.UPDATE_USER_FORM_TABLE_QUERY,
+            (nickname, biography, location, gender, age, photo, telegram_id)
+        )
+        self.connection.commit()
+
     def sql_delete_user_form(self, telegram_id):
         self.cursor.execute(
             sql_queries.DELETE_USER_FORM_QUERY,

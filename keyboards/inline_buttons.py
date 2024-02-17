@@ -58,9 +58,14 @@ async def like_dislike_keyboard(owner_tg_id):
 
 async def my_profile_keyboard():
     markup = InlineKeyboardMarkup()
+    update_button = InlineKeyboardButton(
+        'UPDATE 👤',
+        callback_data=f'update'
+    )
     delete_button = InlineKeyboardButton(
         'DELETE 🫥',
         callback_data=f'delete'
     )
+    markup.add(update_button)
     markup.add(delete_button)
     return markup
