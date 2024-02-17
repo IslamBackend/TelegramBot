@@ -5,7 +5,7 @@ from aiogram.types import ContentTypes
 from config import bot, DESTINATION
 from const import USER_FORM_TEXT
 from database.sql_commands import DataBase
-from keyboards.inline_buttons import questionnaire_keyboard
+from keyboards.inline_buttons import questionnaire_keyboard, my_profile_keyboard
 from aiogram.dispatcher import FSMContext
 from aiogram.dispatcher.filters.state import State, StatesGroup
 
@@ -20,11 +20,25 @@ class RegistrationStates(StatesGroup):
 
 
 async def registration_user_start(call: types.CallbackQuery):
-    await bot.send_message(
-        chat_id=call.message.chat.id,
-        text='Please send me your nickname'
+    db = DataBase()
+    is_registered = db.sql_select_user_form(
+        call.from_user.id
     )
-    await RegistrationStates.nickname.set()
+    print(is_registered)
+    if is_registered:
+        await bot.send_message(
+            chat_id=call.message.chat.id,
+            text='You are already registered. \n'
+                 'Would you like to update your profile or delete?',
+            reply_markup=await my_profile_keyboard()
+        )
+
+    else:
+        await bot.send_message(
+            chat_id=call.message.chat.id,
+            text='Please send me your nickname'
+        )
+        await RegistrationStates.nickname.set()
 
 
 async def load_nickname(message: types.Message, state: FSMContext):

@@ -8,7 +8,7 @@ async def start_keyboard():
         callback_data='start_questionnaire'
     )
     registration_button = InlineKeyboardButton(
-        'Registration 🪪',
+        'Registration 📝',
         callback_data='registration'
     )
     my_profile_button = InlineKeyboardButton(
@@ -16,7 +16,7 @@ async def start_keyboard():
         callback_data='my_profile_call'
     )
     random_profile_button = InlineKeyboardButton(
-        'Random Profiles 🚀',
+        'Random Profiles 🗂️',
         callback_data='random_profile_call'
     )
     markup.add(questionnaire_button)
